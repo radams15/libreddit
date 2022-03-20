@@ -5,7 +5,11 @@
 #ifndef LIBREDDIT_POST_H
 #define LIBREDDIT_POST_H
 
-#include <stddef.h>
+#include <defs.h>
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 typedef struct Post{
     const char* title;
@@ -25,5 +29,9 @@ typedef void (*post_cb)(Post_t*, void*);
 
 const char* post_fullname(Post_t* post);
 const char* post_url(Post_t* post);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //LIBREDDIT_POST_H

@@ -13,7 +13,7 @@
 const char* post_fullname(Post_t *post) {
     char* out = calloc(strlen(post->id)+strlen(post->type)+1, sizeof(char));
 
-    sprintf(out, "%s%s", post->id, post->type);
+    sprintf(out, "%s_%s", post->type, post->id);
 
     return out;
 }
