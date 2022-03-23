@@ -5,7 +5,7 @@
 #define PRIVATE
 
 #include <Reddit.h>
-#include "Net.h"
+#include <request.h>
 
 #include <cJSON.h>
 
@@ -15,15 +15,16 @@
 
 #define header_free curl_slist_free_all
 
-struct curl_slist* get_headers(Reddit_t* reddit){
-    struct curl_slist* out = NULL;
+Headers_t* get_headers(Reddit_t* reddit){
+    Headers_t* out = NULL;
 
-    out = curl_slist_append(out, "User-Agent: libredd/0.0.1");
+    out = headers_append(out, "User-Agent", "libredd/0.0.1");
 
     if(reddit->authenticated){
-        char* auth = calloc(strlen(reddit->token)+64, sizeof(char));
-        sprintf(auth, "Authorization: bearer %s", reddit->token);
-        curl_slist_append(out, auth);
+        char* auth = calloc(strlen(reddit->token)+32, sizeof(char));
+        sprintf(auth, "bearer %s", reddit->token);
+        headers_append(out, "Authorization", auth);
+        free(auth);
     }
 
     return out;
@@ -34,14 +35,14 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
 
     sprintf(data, "grant_type=password&username=%s&password=%s", username, password);
 
-    struct curl_slist* headers = get_headers(reddit);
+    Headers_t* headers = get_headers(reddit);
 
-    const char* raw = net_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
+    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
 
-    header_free(headers);
+    headers_free(headers);
     free(data);
 
-    cJSON* json = cJSON_Parse(raw);
+    cJSON* json = cJSON_Parse(raw->data);
 
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
@@ -73,27 +74,27 @@ Reddit_t* reddit_new(const char *username, const char *password, const char *cli
 }
 
 int reddit_get_login_status(Reddit_t* reddit){
-    struct curl_slist* headers = get_headers(reddit);
+    Headers_t* headers = get_headers(reddit);
 
     char* url = calloc(512, sizeof(char));
 
     strcpy(url, "https://oauth.reddit.com/api/v1/scopes");
 
-    const char* raw = net_get(url, reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
 
-    header_free(headers);
+    headers_free(headers);
 
-    cJSON* json = cJSON_Parse(raw);
+    cJSON* json = cJSON_Parse(raw->data);
 
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
 
-        free((void*) raw);
+        res_free((void*) raw);
 
         return UNAUTHENTICATED;
     }
 
-    free((void*) raw);
+    res_free((void*) raw);
 
     return AUTHENTICATED;
 }
@@ -114,7 +115,7 @@ Reddit_t* reddit_new_with_token(const char *username, const char* token) {
 }
 
 int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, post_cb callback, void* ptr) {
-    struct curl_slist* headers = get_headers(reddit);
+    Headers_t* headers = get_headers(reddit);
 
     char* url = calloc(512, sizeof(char));
 
@@ -138,11 +139,11 @@ int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, pos
         strcat(url, before);
     }
 
-    const char* raw = net_get(url, reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
 
-    header_free(headers);
+    headers_free(headers);
 
-    cJSON* json = cJSON_Parse(raw);
+    cJSON* json = cJSON_Parse(raw->data);
 
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
@@ -173,13 +174,15 @@ int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, pos
         callback(post, ptr);
     }
 
+    res_free(raw);
+
     return EXIT_SUCCESS;
 }
 
 
 int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* type, size_t limit, const char *before, post_cb callback,
                             void *ptr) {
-    struct curl_slist* headers = get_headers(reddit);
+    Headers_t* headers = get_headers(reddit);
 
     char* url = calloc(512+strlen(type), sizeof(char));
 
@@ -203,11 +206,11 @@ int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* ty
         strcat(url, before);
     }
 
-    const char* raw = net_get(url, reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
 
-    header_free(headers);
+    headers_free(headers);
 
-    cJSON* json = cJSON_Parse(raw);
+    cJSON* json = cJSON_Parse(raw->data);
 
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
@@ -238,19 +241,21 @@ int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* ty
         callback(post, ptr);
     }
 
+    res_free(raw);
+
     return EXIT_SUCCESS;
 }
 
 List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     List_t* out = LIST(Subreddit_t, (freer_cb) subreddit_free);
 
-    struct curl_slist* headers = get_headers(reddit);
+    Headers_t* headers = get_headers(reddit);
 
-    const char* raw = net_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", reddit->use_proxy, reddit->proxy, headers);
 
-    header_free(headers);
+    headers_free(headers);
 
-    cJSON* json = cJSON_Parse(raw);
+    cJSON* json = cJSON_Parse(raw->data);
 
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
@@ -273,6 +278,8 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
 
         list_append(out, sub);
     }
+
+    res_free(raw);
 
     return out;
 }
