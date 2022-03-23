@@ -35,8 +35,6 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
 
     Headers_t* headers = get_headers(reddit);
 
-    //printf("OK!\n");
-
     Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
 
     headers_free(headers);
@@ -283,4 +281,47 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     res_free(raw);
 
     return out;
+}
+
+void process_listing(cJSON* listing){
+    cJSON* data = cJSON_GetObjectItem(listing, "data");
+    cJSON* children = cJSON_GetObjectItem(data, "children");
+
+    cJSON* child;
+
+    cJSON_ArrayForEach(child, children) {
+        printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "kind"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
+    }
+}
+
+int post_get_comments(Reddit_t* reddit, Post_t* post, size_t limit, const char* after, comment_cb callback, void* ptr) {
+    Headers_t* headers = get_headers(reddit);
+
+    char* url = calloc(512+strlen(post->id), sizeof(char));
+
+    sprintf(url, "https://oauth.reddit.com/comments/%s", post->id);
+
+    if(limit != -1){
+        strcat(url, "?limit=");
+        char* limit_a = calloc(8, sizeof(char));
+        sprintf(limit_a, "%zu", limit);
+        strcat(url, limit_a);
+        free(limit_a);
+    }
+
+
+    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
+
+    headers_free(headers);
+
+    cJSON* json = cJSON_Parse(raw->data);
+
+    cJSON* listing;
+    cJSON_ArrayForEach(listing, json){
+        process_listing(listing);
+    }
+
+    res_free(raw);
+
+    return EXIT_SUCCESS;
 }
