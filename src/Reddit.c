@@ -13,8 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define header_free curl_slist_free_all
-
 Headers_t* get_headers(Reddit_t* reddit){
     Headers_t* out = NULL;
 
@@ -37,6 +35,8 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
 
     Headers_t* headers = get_headers(reddit);
 
+    //printf("OK!\n");
+
     Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
 
     headers_free(headers);
@@ -55,11 +55,12 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
     return EXIT_SUCCESS;
 }
 
-Reddit_t* reddit_new(const char *username, const char *password, const char *client_id, const char *secret) {
+Reddit_t* reddit_new(const char* username, const char *password, const char *client_id, const char *secret) {
     Reddit_t* out = malloc(sizeof(Reddit_t));
 
     out->use_proxy = 0;
     out->proxy = strdup("http://http.therhys.co.uk/yt/proxy.php?url=");
+    out->authenticated = 0;
 
     if(login(out, username, password, client_id, secret) == EXIT_SUCCESS){
         out->authenticated = 1;
