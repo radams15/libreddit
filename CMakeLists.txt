@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 99)
 
 option(BUILD_TEST "Builds a test app" ON)
 
-add_subdirectory(lib/libreq)
+add_subdirectory(lib/librequest)
 
 add_library(reddit SHARED test/main.c src/Reddit.c headers/Reddit.h test/SECRETS.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.c headers/Post.h src/List.c headers/List.h src/Subreddit.c headers/Subreddit.h headers/defs.h src/Comment.c headers/Comment.h)
 
