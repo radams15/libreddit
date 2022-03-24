@@ -283,14 +283,55 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     return out;
 }
 
-void process_listing(cJSON* listing){
+void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* parent){
     cJSON* data = cJSON_GetObjectItem(listing, "data");
     cJSON* children = cJSON_GetObjectItem(data, "children");
 
     cJSON* child;
 
     cJSON_ArrayForEach(child, children) {
-        printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "kind"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
+        //printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "data"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
+
+        const char* kind = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
+        cJSON* child_data = cJSON_GetObjectItem(child, "data");
+
+        if(strcmp(kind, "t3") == 0){
+            Comment_t* out = (Comment_t*) malloc(sizeof(Comment_t));
+
+            out->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
+            out->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
+            out->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
+            //out->body = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, ""));
+            out->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
+            out->score = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
+
+            callback(out, ptr, 1);
+        }else if(strcmp(kind, "t1") == 0){
+            Comment_t* out = (Comment_t*) malloc(sizeof(Comment_t));
+            out->no_children = 0;
+            out->children = malloc(0);
+
+            out->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
+            out->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
+            out->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
+            out->body = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "body"));
+            out->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
+            out->score = (size_t) cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
+
+            cJSON* replies = cJSON_GetObjectItem(child_data, "replies");
+
+            process_listing(replies, callback, ptr, out);
+
+            if(parent != NULL){
+                parent->no_children++;
+                parent->children = realloc(parent->children, (parent->no_children)*sizeof(Comment_t*));
+
+                parent->children[parent->no_children-1] = out;
+            }else{
+                callback(out, ptr, 0);
+            }
+
+        }
     }
 }
 
@@ -318,7 +359,7 @@ int post_get_comments(Reddit_t* reddit, Post_t* post, size_t limit, const char* 
 
     cJSON* listing;
     cJSON_ArrayForEach(listing, json){
-        process_listing(listing);
+        process_listing(listing, callback, ptr, NULL);
     }
 
     res_free(raw);

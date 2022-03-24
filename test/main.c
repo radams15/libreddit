@@ -8,16 +8,28 @@
 
 #include "SECRETS.h"
 
-char* last;
-
 void post_got(Post_t* post, void* ptr){
     printf("Post '%s' by '%s' in 'r/%s' ====> %s\n", post->title, post->author, post->subreddit, post_fullname(post));
-
-    last = (char*) post_fullname(post);
 }
 
-void comment_got(Comment_t* comment, void* ptr){
-    printf("Comment by '%s' ====> '%s'\n\n", comment->author, comment->body);
+void comment_recurse(Comment_t* comment, int level){
+    printf("Comment by '%s' ====> '%s'\n\n--------------------------------------\n", comment->author, comment->body);
+
+    for(int i=0 ; i<comment->no_children ; i++){
+        Comment_t* child = comment->children[i];
+        for(int x=0 ; x<level ; x++) {
+            printf("\t");
+        }
+        comment_recurse(child, level+1);
+    }
+}
+
+void comment_got(Comment_t* comment, void* ptr, int is_title){
+    if(is_title){
+        printf("Title Page: %s (%s)\n\n", comment->title, comment->url);
+    }else {
+        comment_recurse(comment, 1);
+    }
 }
 
 int main() {

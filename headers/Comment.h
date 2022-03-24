@@ -8,13 +8,18 @@
 #include <defs.h>
 
 typedef struct Comment {
+    const char* title;
     const char* author;
     const char* body;
     size_t score;
     const char* id;
+    const char* thumbnail;
+    const char* url;
+    struct Comment** children;
+    size_t no_children;
 } Comment_t;
 
-typedef void (*comment_cb)(Comment_t*, void*);
+typedef void (*comment_cb)(Comment_t*, void*, int);
 
 void comment_free(Comment_t* comment);
 
