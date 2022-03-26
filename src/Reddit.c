@@ -290,8 +290,7 @@ void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* 
     cJSON* child;
 
     cJSON_ArrayForEach(child, children) {
-        printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "data"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
-exit(1);
+        //printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "data"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
         const char* kind = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
         cJSON* child_data = cJSON_GetObjectItem(child, "data");
 
