@@ -26,7 +26,7 @@ void comment_recurse(Comment_t* comment, int level){
 
 void comment_got(Comment_t* comment, void* ptr, int is_title){
     if(is_title){
-        printf("Title Page: %s (%s)\n\n", comment->title, comment->url);
+        printf("Title Page: %s (%s) - thumbnail: %s\n\n", comment->title, comment->url, comment->thumbnail);
     }else {
         comment_recurse(comment, 1);
     }
