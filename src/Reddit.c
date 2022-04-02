@@ -113,6 +113,30 @@ Reddit_t* reddit_new_with_token(const char *username, const char* token) {
     return out;
 }
 
+Post_t* process_post(cJSON* child){
+    cJSON* child_data = cJSON_GetObjectItem(child, "data");
+
+    Post_t* post = malloc(sizeof(Post_t));
+
+    post->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
+    post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
+    post->subreddit = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit"));
+    post->text = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "selftext"));
+    post->upvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "ups"));
+    post->downvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "downs"));
+    post->score = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
+
+    post->type = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
+    post->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
+
+    const char* thumb = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
+    if(strcmp(thumb, "self") != 0){
+        post->thumbnail = thumb;
+    }
+
+    return post;
+}
+
 int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, post_cb callback, void* ptr) {
     Headers_t* headers = get_headers(reddit);
 
@@ -155,20 +179,7 @@ int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, pos
 
     cJSON* child;
     cJSON_ArrayForEach(child, children){
-        cJSON* child_data = cJSON_GetObjectItem(child, "data");
-
-        Post_t* post = malloc(sizeof(Post_t));
-
-        post->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
-        post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
-        post->subreddit = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit"));
-        post->text = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "selftext"));
-        post->upvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "ups"));
-        post->downvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "downs"));
-        post->score = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
-
-        post->type = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
-        post->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
+        Post_t* post = process_post(child);
 
         callback(post, ptr);
     }
@@ -222,20 +233,7 @@ int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* ty
 
     cJSON* child;
     cJSON_ArrayForEach(child, children){
-        cJSON* child_data = cJSON_GetObjectItem(child, "data");
-
-        Post_t* post = malloc(sizeof(Post_t));
-
-        post->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
-        post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
-        post->subreddit = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit"));
-        post->text = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "selftext"));
-        post->upvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "ups"));
-        post->downvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "downs"));
-        post->score = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
-
-        post->type = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
-        post->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
+        Post_t* post = process_post(child);
 
         callback(post, ptr);
     }

@@ -9,7 +9,7 @@
 #include "SECRETS.h"
 
 void post_got(Post_t* post, void* ptr){
-    printf("Post '%s' by '%s' in 'r/%s' ====> %s\n", post->title, post->author, post->subreddit, post_fullname(post));
+    printf("Post '%s' by '%s' in 'r/%s' ====> %s\n", post->title, post->author, post->subreddit, post->thumbnail);
 }
 
 void comment_recurse(Comment_t* comment, int level){
@@ -41,15 +41,15 @@ int main() {
 
 	printf("Tok: %s\n", reddit->token);
 
-    /*Subreddit_t* subreddit = subreddit_new("gnome");
+    Subreddit_t* subreddit = subreddit_new("gnome");
 
-    subreddit_get_posts(reddit, subreddit, "hot", 100, NULL, post_got, NULL);*/
+    subreddit_get_posts(reddit, subreddit, "hot", 100, NULL, post_got, NULL);
 
-    Post_t post;
+    /*Post_t post;
     post.id = strdup("t8o6cr");
     post.subreddit = strdup("gnome");
 
-    post_get_comments(reddit, &post, -1, NULL, comment_got, NULL);
+    post_get_comments(reddit, &post, -1, NULL, comment_got, NULL);*/
 
     return 0;
 }

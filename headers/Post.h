@@ -16,6 +16,7 @@ typedef struct Post{
     const char* author;
     const char* subreddit;
     const char* text;
+    const char* thumbnail;
     size_t upvotes;
     size_t downvotes;
     size_t score;
