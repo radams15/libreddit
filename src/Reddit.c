@@ -132,6 +132,8 @@ Post_t* process_post(cJSON* child){
     const char* thumb = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
     if(strcmp(thumb, "self") != 0){
         post->thumbnail = thumb;
+    }else{
+        post->thumbnail = NULL;
     }
 
     return post;
