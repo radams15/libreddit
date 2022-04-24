@@ -5,15 +5,13 @@
 #ifndef LIBREDDIT_SUBREDDIT_H
 #define LIBREDDIT_SUBREDDIT_H
 
-#include <defs.h>
-
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 typedef struct Subreddit {
     const char* name;
-    size_t subs;
+    unsigned long subs;
 #ifdef PRIVATE
     const char* url;
 #endif

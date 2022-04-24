@@ -139,7 +139,7 @@ Post_t* process_post(cJSON* child){
     return post;
 }
 
-int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, post_cb callback, void* ptr) {
+int reddit_get_posts_hot(Reddit_t *reddit, unsigned long limit, const char *before, post_cb callback, void* ptr) {
     Headers_t* headers = get_headers(reddit);
 
     char* url = calloc(512, sizeof(char));
@@ -192,7 +192,7 @@ int reddit_get_posts_hot(Reddit_t *reddit, size_t limit, const char *before, pos
 }
 
 
-int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* type, size_t limit, const char *before, post_cb callback,
+int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* type, unsigned long limit, const char *before, post_cb callback,
                             void *ptr) {
     Headers_t* headers = get_headers(reddit);
 
@@ -316,7 +316,7 @@ void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* 
             out->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
             out->body = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "body"));
             out->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
-            out->score = (size_t) cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
+            out->score = (unsigned long) cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
 
             cJSON* replies = cJSON_GetObjectItem(child_data, "replies");
 
@@ -335,7 +335,7 @@ void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* 
     }
 }
 
-int post_get_comments(Reddit_t* reddit, Post_t* post, size_t limit, const char* after, comment_cb callback, void* ptr) {
+int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr) {
     Headers_t* headers = get_headers(reddit);
 
     char* url = calloc(512+strlen(post->id), sizeof(char));

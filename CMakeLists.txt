@@ -3,13 +3,13 @@ project(reddit C)
 
 set(CMAKE_C_STANDARD 99)
 
-option(BUILD_TEST "Builds a test app" ON)
+option(BUILD_TEST "Builds a test app" OFF)
 
 add_subdirectory(lib/librequest)
 
-add_library(reddit SHARED src/Reddit.c headers/Reddit.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.c headers/Post.h src/List.c headers/List.h src/Subreddit.c headers/Subreddit.h headers/defs.h src/Comment.c headers/Comment.h)
+add_library(reddit SHARED src/Reddit.c include/Reddit.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.c include/Post.h src/List.c include/List.h src/Subreddit.c include/Subreddit.h include/defs.h src/Comment.c include/Comment.h)
 
-target_include_directories(reddit PRIVATE ${LIBREQ_HEADERS} headers lib/cJSON)
+target_include_directories(reddit PRIVATE ${LIBREQ_HEADERS} include lib/cJSON)
 target_link_libraries(reddit PRIVATE request)
 
 message("Headers: ${LIBREQ_HEADERS}")
@@ -17,5 +17,5 @@ message("Headers: ${LIBREQ_HEADERS}")
 if(BUILD_TEST)
     add_executable(redd test/main.c)
     target_link_libraries(redd PRIVATE reddit)
-    target_include_directories(redd PRIVATE headers)
+    target_include_directories(redd PRIVATE include)
 endif()

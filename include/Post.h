@@ -5,8 +5,6 @@
 #ifndef LIBREDDIT_POST_H
 #define LIBREDDIT_POST_H
 
-#include <defs.h>
-
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -17,9 +15,9 @@ typedef struct Post{
     const char* subreddit;
     const char* text;
     const char* thumbnail;
-    size_t upvotes;
-    size_t downvotes;
-    size_t score;
+    unsigned long upvotes;
+    unsigned long downvotes;
+    unsigned long score;
     const char* id;
 #ifdef PRIVATE
     const char* type;
