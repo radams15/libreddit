@@ -5,8 +5,6 @@
 
 
 
-
-
 typedef void(* freer_cb)(void*);
 
 typedef struct List{

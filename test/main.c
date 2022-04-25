@@ -41,9 +41,13 @@ int main() {
 
 	printf("Tok: %s\n", reddit->token);
 
-    Subreddit_t* subreddit = subreddit_new("gnome");
+    List_t* posts = reddit_get_posts_hot_list(reddit, 100, "");
 
-    subreddit_get_posts(reddit, subreddit, "hot", 100, NULL, post_got, NULL);
+    for(int i=0 ; i<posts->length ; i++){
+        printf("%s\n", ((Post_t*)posts->data[i])->title);
+    }
+
+    list_free(posts);
 
     /*Post_t post;
     post.id = strdup("t8o6cr");

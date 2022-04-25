@@ -36,12 +36,14 @@ Reddit_t* reddit_new(const char* username, const char* password, const char* cli
 Reddit_t* reddit_new_with_token(const char *username, const char* token);
 
 int reddit_get_posts_hot(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
+List_t* reddit_get_posts_hot_list(Reddit_t* reddit, unsigned long limit, const char* after);
 
 List_t* reddit_get_subbed_list(Reddit_t* reddit);
 
 int reddit_get_login_status(Reddit_t* reddit);
 
 int subreddit_get_posts(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after, post_cb callback, void* ptr);
+List_t* subreddit_get_posts_list(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after);
 
 int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr);
 

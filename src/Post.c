@@ -25,3 +25,13 @@ const char* post_url(Post_t *post) {
 
     return out;
 }
+
+void post_free(Post_t *post) {
+    free(post->id);
+    free(post->type);
+    free(post->author);
+    free(post->subreddit);
+    free(post->thumbnail);
+    free(post->title);
+    free(post);
+}

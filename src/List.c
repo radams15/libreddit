@@ -27,3 +27,9 @@ void list_append(List_t *lst, void* data) {
 
     lst->data = realloc(lst->data, lst->length*lst->elem_size);
 }
+
+void list_free(List_t *lst) {
+    for(unsigned long i=0 ; i<lst->length ; i++){
+        lst->freer(lst->data[i]);
+    }
+}

@@ -29,6 +29,8 @@ typedef void (*post_cb)(Post_t*, void*);
 const char* post_fullname(Post_t* post);
 const char* post_url(Post_t* post);
 
+void post_free(Post_t* post);
+
 #ifdef __cplusplus
 }
 #endif

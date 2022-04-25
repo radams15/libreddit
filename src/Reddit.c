@@ -366,3 +366,24 @@ int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const
 
     return EXIT_SUCCESS;
 }
+
+void list_adder(void* item, void* ptr){
+    list_append((List_t*) ptr, item);
+}
+
+List_t* reddit_get_posts_hot_list(Reddit_t *reddit, unsigned long limit, const char *after) {
+    List_t* out = LIST(Post_t, post_free);
+
+    reddit_get_posts_hot(reddit, limit, after, list_adder, (void*) out);
+
+    return out;
+}
+
+List_t* subreddit_get_posts_list(Reddit_t *reddit, Subreddit_t *subreddit, const char *type, unsigned long limit,
+                                 const char *after) {
+    List_t* out = LIST(Post_t, post_free);
+
+    subreddit_get_posts(reddit, subreddit, type, limit, after, list_adder, (void*) out);
+
+    return out;
+}
