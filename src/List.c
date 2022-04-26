@@ -29,7 +29,12 @@ void list_append(List_t *lst, void* data) {
 }
 
 void list_free(List_t *lst) {
-    for(unsigned long i=0 ; i<lst->length ; i++){
+    unsigned long i;    
+    for(i=0 ; i<lst->length ; i++){
         lst->freer(lst->data[i]);
     }
+}
+
+void* list_get(List_t *lst, int id) {
+    return lst->data[id];
 }

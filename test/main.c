@@ -41,13 +41,7 @@ int main() {
 
 	printf("Tok: %s\n", reddit->token);
 
-    List_t* posts = reddit_get_posts_hot_list(reddit, 100, "");
-
-    for(int i=0 ; i<posts->length ; i++){
-        printf("%s\n", ((Post_t*)posts->data[i])->title);
-    }
-
-    list_free(posts);
+    reddit_get_posts_hot(reddit, 100, "", post_got, NULL);
 
     /*Post_t post;
     post.id = strdup("t8o6cr");

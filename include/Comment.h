@@ -13,7 +13,7 @@ typedef struct Comment {
     const char* id;
     const char* thumbnail;
     const char* url;
-    struct Comment** children;
+    void** children;
     unsigned long no_children;
 } Comment_t;
 

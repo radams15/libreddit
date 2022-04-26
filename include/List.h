@@ -24,6 +24,8 @@ List_t* list_new(unsigned long elem_size, freer_cb freer);
 
 void list_append(List_t *lst, void* data);
 
+void* list_get(List_t* lst, int id);
+
 void list_free(List_t* lst);
 
 #define LIST(type, freer) list_new(sizeof(type), freer)
