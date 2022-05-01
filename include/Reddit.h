@@ -12,6 +12,8 @@
 #include <Subreddit.h>
 #include <Comment.h>
 
+#include "API.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -32,23 +34,23 @@ typedef struct Reddit{
 #endif
 } Reddit_t;
 
-Reddit_t* reddit_new(const char* username, const char* password, const char* client_id, const char* secret);
-Reddit_t* reddit_new_with_token(const char *username, const char* token);
+LIBRARY_API Reddit_t* reddit_new(const char* username, const char* password, const char* client_id, const char* secret);
+LIBRARY_API Reddit_t* reddit_new_with_token(const char *username, const char* token);
 
-int reddit_get_posts_hot(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
-int reddit_get_posts_hot_t(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
-List_t* reddit_get_posts_hot_list(Reddit_t* reddit, unsigned long limit, const char* after);
+LIBRARY_API int reddit_get_posts_hot(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
+LIBRARY_API int reddit_get_posts_hot_t(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
+LIBRARY_API List_t* reddit_get_posts_hot_list(Reddit_t* reddit, unsigned long limit, const char* after);
 
-List_t* reddit_get_subbed_list(Reddit_t* reddit);
+LIBRARY_API List_t* reddit_get_subbed_list(Reddit_t* reddit);
 
-int reddit_get_login_status(Reddit_t* reddit);
+LIBRARY_API int reddit_get_login_status(Reddit_t* reddit);
 
-int subreddit_get_posts(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after, post_cb callback, void* ptr);
-int subreddit_get_posts_t(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after, post_cb callback, void* ptr);
-List_t* subreddit_get_posts_list(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after);
+LIBRARY_API int subreddit_get_posts(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after, post_cb callback, void* ptr);
+LIBRARY_API int subreddit_get_posts_t(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after, post_cb callback, void* ptr);
+LIBRARY_API List_t* subreddit_get_posts_list(Reddit_t* reddit, Subreddit_t* subreddit, const char* type, unsigned long limit, const char* after);
 
-int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr);
-int post_get_comments_t(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr);
+LIBRARY_API int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr);
+LIBRARY_API int post_get_comments_t(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr);
 
 #ifdef __cplusplus
 }

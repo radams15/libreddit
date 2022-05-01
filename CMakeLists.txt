@@ -20,7 +20,7 @@ if(ENABLE_THREADING)
 endif()
 
 if(BUILD_TEST)
-    add_executable(redd test/main.c)
+    add_executable(redd test/main.c include/API.h)
     target_link_libraries(redd PRIVATE reddit)
     target_include_directories(redd PRIVATE include)
 endif()

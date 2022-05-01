@@ -5,6 +5,8 @@
 #ifndef LIBREDDIT_LIST_H
 #define LIBREDDIT_LIST_H
 
+#include "API.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -20,13 +22,13 @@ typedef struct List{
 #endif
 } List_t;
 
-List_t* list_new(unsigned long elem_size, freer_cb freer);
+LIBRARY_API List_t* list_new(unsigned long elem_size, freer_cb freer);
 
-void list_append(List_t *lst, void* data);
+LIBRARY_API void list_append(List_t *lst, void* data);
 
-void* list_get(List_t* lst, int id);
+LIBRARY_API void* list_get(List_t* lst, int id);
 
-void list_free(List_t* lst);
+LIBRARY_API void list_free(List_t* lst);
 
 #define LIST(type, freer) list_new(sizeof(type), freer)
 

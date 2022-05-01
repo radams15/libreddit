@@ -5,6 +5,8 @@
 #ifndef LIBREDDIT_SUBREDDIT_H
 #define LIBREDDIT_SUBREDDIT_H
 
+#include "API.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -17,9 +19,9 @@ typedef struct Subreddit {
 #endif
 } Subreddit_t;
 
-Subreddit_t* subreddit_new(const char* name);
+LIBRARY_API Subreddit_t* subreddit_new(const char* name);
 
-void subreddit_free(Subreddit_t* subreddit);
+LIBRARY_API void subreddit_free(Subreddit_t* subreddit);
 
 #ifdef __cplusplus
 }

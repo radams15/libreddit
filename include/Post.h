@@ -5,6 +5,8 @@
 #ifndef LIBREDDIT_POST_H
 #define LIBREDDIT_POST_H
 
+#include "API.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -24,12 +26,12 @@ typedef struct Post{
 #endif
 } Post_t;
 
-typedef void (*post_cb)(Post_t*, void*);
+LIBRARY_API typedef void (*post_cb)(Post_t*, void*);
 
-const char* post_fullname(Post_t* post);
-const char* post_url(Post_t* post);
+LIBRARY_API const char* post_fullname(Post_t* post);
+LIBRARY_API const char* post_url(Post_t* post);
 
-void post_free(Post_t* post);
+LIBRARY_API void post_free(Post_t* post);
 
 #ifdef __cplusplus
 }
