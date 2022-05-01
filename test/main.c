@@ -41,7 +41,9 @@ int main() {
 
 	printf("Tok: %s\n", reddit->token);
 
-    reddit_get_posts_hot(reddit, 100, "", post_got, NULL);
+    reddit_get_posts_hot_t(reddit, 100, "", post_got, NULL);
+
+    usleep(1000*1000*20);
 
     /*Post_t post;
     post.id = strdup("t8o6cr");
