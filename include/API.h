@@ -5,7 +5,7 @@
 #ifndef REDDIT_API_H
 #define REDDIT_API_H
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !NO_EXPORT
 #    ifdef LIBRARY_EXPORTS
 #        define LIBRARY_API __declspec(dllexport)
 #    else

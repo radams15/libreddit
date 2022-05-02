@@ -13,6 +13,9 @@ add_library(reddit SHARED src/Reddit.c include/Reddit.h lib/cJSON/cJSON.c lib/cJ
 target_include_directories(reddit PRIVATE ${LIBREQ_HEADERS} include lib/cJSON)
 target_link_libraries(reddit PRIVATE request)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_definitions(reddit PUBLIC NO_EXPORT)
+
 message("Headers: ${LIBREQ_HEADERS}")
 
 if(ENABLE_THREADING)
