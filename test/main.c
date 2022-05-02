@@ -9,7 +9,10 @@
 #include "SECRETS.h"
 
 void post_got(Post_t* post, void* ptr){
-    printf("Post '%s' by '%s' in 'r/%s' ====> %s\n", post->title, post->author, post->subreddit, post->thumbnail);
+    printf("Post '%s' by '%s' in 'r/%s'\n", post->title, post->author, post->subreddit);
+    if(post_is_img(post)){
+        printf("\tImage: %s\n", post->url);
+    }
 }
 
 void comment_recurse(Comment_t* comment, int level){
@@ -41,9 +44,7 @@ int main() {
 
 	printf("Tok: %s\n", reddit->token);
 
-    reddit_get_posts_hot_t(reddit, 100, "", post_got, NULL);
-
-    usleep(1000*1000*20);
+    reddit_get_posts_hot(reddit, 100, "", post_got, NULL);
 
     /*Post_t post;
     post.id = strdup("t8o6cr");

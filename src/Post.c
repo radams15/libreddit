@@ -32,6 +32,15 @@ void post_free(Post_t *post) {
     free(post->author);
     free(post->subreddit);
     free(post->thumbnail);
+    free(post->url);
     free(post->title);
     free(post);
+}
+
+#define CONTAINS(haystack, needle) (strstr(haystack, needle) != NULL)
+
+int post_is_img(Post_t *post) {
+    return CONTAINS(post->url, ".png")
+        || CONTAINS(post->url, ".jpg")
+        || CONTAINS(post->url, ".gif");
 }

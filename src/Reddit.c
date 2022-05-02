@@ -127,9 +127,10 @@ Post_t* process_post(cJSON* child){
     Post_t* post = malloc(sizeof(Post_t));
 
     post->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
-    post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
+    post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author"));
     post->subreddit = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit"));
     post->text = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "selftext"));
+    post->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
     post->upvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "ups"));
     post->downvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "downs"));
     post->score = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
@@ -336,7 +337,7 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     return out;
 }
 
-void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* parent){
+void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* parent){
     cJSON* data = cJSON_GetObjectItem(listing, "data");
     cJSON* children = cJSON_GetObjectItem(data, "children");
 
@@ -373,7 +374,7 @@ void process_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* 
 
             cJSON* replies = cJSON_GetObjectItem(child_data, "replies");
 
-            process_listing(replies, callback, ptr, out);
+            process_comment_listing(replies, callback, ptr, out);
 
             if(parent != NULL){
                 parent->no_children++;
@@ -421,7 +422,7 @@ void* post_get_comments_helper(struct post_get_comments_args* args) {
 
     cJSON* listing;
     cJSON_ArrayForEach(listing, json){
-        process_listing(listing, args->callback, args->ptr, NULL);
+        process_comment_listing(listing, args->callback, args->ptr, NULL);
     }
 
     res_free(raw);
