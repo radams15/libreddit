@@ -12,6 +12,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <vector>
+
 #include "Subreddit.h"
 
 int strlen(std::string str){

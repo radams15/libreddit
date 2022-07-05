@@ -1,2 +1,4 @@
 /test/SECRETS.h
 /cmake-build-debug/
+*._*
+a.out

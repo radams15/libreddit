@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#define PRIVATE
-
 #include <Reddit.h>
 #include <unistd.h>
 #include <string.h>
@@ -9,7 +7,7 @@
 #include "SECRETS.h"
 
 void post_got(Post* post, void* ptr){
-    printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit);
+    printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
     if(post_is_img(post)){
         printf("\tImage: %s\n", post->url.c_str());
     }
