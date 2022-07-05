@@ -2,3 +2,7 @@
 /cmake-build-debug/
 *._*
 a.out
+*.java
+*.dylib
+*.so
+*_wrap.cxx
