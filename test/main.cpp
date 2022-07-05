@@ -8,7 +8,7 @@
 
 void post_got(Post* post, void* ptr){
     printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
-    if(post_is_img(post)){
+    if(post->is_img()){
         printf("\tImage: %s\n", post->url.c_str());
     }
 }

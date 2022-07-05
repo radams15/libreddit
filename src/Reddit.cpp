@@ -25,28 +25,21 @@ struct Headers* Reddit::get_headers(){
     out = headers_append(out, "User-Agent", "libredd/0.0.1");
 
     if(authenticated){
-        char* auth = (char*) calloc(strlen(token)+32, sizeof(char));
-        sprintf(auth, "bearer %s", token.c_str());
-        headers_append(out, "Authorization", auth);
-        free(auth);
+        std::string auth = "bearer " + token;
+        headers_append(out, "Authorization", auth.c_str());
     }
 
     return out;
 }
 
 int Reddit::login(std::string username, std::string password, std::string client_id, std::string secret){
-    char* data = (char*) calloc(strlen(username)+strlen(password)+64, sizeof(char));
-
-    sprintf(data, "grant_type=password&username=%s&password=%s", username.c_str(), password.c_str());
-
     Headers_t* headers = get_headers();
 
-    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", 0, NULL, data, headers, client_id.c_str(), secret.c_str());
+    std::string data = "grant_type=password&username="+username+"&password="+password;
+
+    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", 0, NULL, data.c_str(), headers, client_id.c_str(), secret.c_str());
 
     headers_free(headers);
-    free(data);
-
-    printf("%s\n", raw->data);
 
     cJSON* json = cJSON_Parse(raw->data);
 
@@ -64,13 +57,8 @@ int Reddit::login(std::string username, std::string password, std::string client
 Reddit::Reddit(std::string username, std::string password, std::string client_id, std::string secret) {
     authenticated = 0;
 
-    this->username = username;
-    this->password = password;
-    this->client_id = client_id;
-    this->client_secret = secret;
-
     if(login(username, password, client_id, secret) == EXIT_SUCCESS){
-        authenticated = 1;
+        authenticated = true;
     }else {
         fprintf(stderr, "Failed to login to reddit.");
     }
@@ -79,11 +67,9 @@ Reddit::Reddit(std::string username, std::string password, std::string client_id
 int Reddit::get_login_status(){
     Headers_t* headers = get_headers();
 
-    char* url = (char*) calloc(512, sizeof(char));
+    std::string url = "https://oauth.reddit.com/api/v1/scopes";
 
-    strcpy(url, "https://oauth.reddit.com/api/v1/scopes");
-
-    Res_t* raw = req_get(url, false, NULL, headers);
+    Res_t* raw = req_get(url.c_str(), false, NULL, headers);
 
     headers_free(headers);
 
@@ -103,7 +89,7 @@ int Reddit::get_login_status(){
 }
 
 Reddit::Reddit(std::string username, std::string token) {
-    authenticated = 1; // Just so that get_headers uses the token anyway.
+    authenticated = true; // Just so that get_headers uses the token anyway.
 
     this->token = token;
 
@@ -140,7 +126,7 @@ Post* process_post(Reddit* reddit, cJSON* child){
 struct get_post_hot_args {
     Reddit* reddit;
     unsigned long limit;
-    std::string before;
+    std::string after;
     post_cb callback;
     void* ptr;
 };
@@ -148,29 +134,23 @@ struct get_post_hot_args {
 void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
     Headers_t* headers = args->reddit->get_headers();
 
-    char* url = (char*) calloc(512, sizeof(char));
-
-    strcpy(url, "https://oauth.reddit.com/hot");
+    std::string url ="https://oauth.reddit.com/hot";
 
     if(args->limit != -1){
-        strcat(url, "?limit=");
-        char* limit_a = (char*) calloc(8, sizeof(char));
-        sprintf(limit_a, "%zu", args->limit);
-        strcat(url, limit_a);
-        free(limit_a);
+        url += "?limit=" + std::to_string(args->limit);
     }
 
-    if(! args->before.empty()) {
+    if(! args->after.empty()) {
         if (args->limit != -1) {
-            strcat(url, "&after=");
+            url += "&after=" + std::to_string(args->limit);
         } else if (args->limit == -1) {
-            strcat(url, "?after=");
+            url += "?after=" + std::to_string(args->limit);
         }
 
-        strcat(url, args->before.c_str());
+        url += args->after;
     }
 
-    Res_t* raw = req_get(url, 0, NULL, headers);
+    Res_t* raw = req_get(url.c_str(), 0, NULL, headers);
 
     headers_free(headers);
 
@@ -218,7 +198,7 @@ struct subreddit_get_posts_args {
     Subreddit* subreddit;
     std::string type;
     unsigned long limit;
-    std::string before;
+    std::string after;
     post_cb callback;
     void* ptr;
 };
@@ -226,29 +206,23 @@ struct subreddit_get_posts_args {
 void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
     Headers_t* headers = args->reddit->get_headers();
 
-    char* url = (char*) calloc(512+strlen(args->type), sizeof(char));
-
-    sprintf(url, "https://oauth.reddit.com/r/%s/%s", args->subreddit->name.c_str(), args->type.c_str());
+    std::string url = "https://oauth.reddit.com/r/" + args->subreddit->name + "/" + args->type;
 
     if(args->limit != -1){
-        strcat(url, "?limit=");
-        char* limit_a = (char*) calloc(8, sizeof(char));
-        sprintf(limit_a, "%zu", args->limit);
-        strcat(url, limit_a);
-        free(limit_a);
+        url += "?limit=" + std::to_string(args->limit);
     }
 
-    if(! args->before.empty()) {
+    if(! args->after.empty()) {
         if (args->limit != -1) {
-            strcat(url, "&after=");
+            url += "&after=" + std::to_string(args->limit);
         } else if (args->limit == -1) {
-            strcat(url, "?after=");
+            url += "?after=" + std::to_string(args->limit);
         }
 
-        strcat(url, args->before.c_str());
+        url += args->after;
     }
 
-    Res_t* raw = req_get(url, 0, NULL, headers);
+    Res_t* raw = req_get(url.c_str(), 0, NULL, headers);
 
     headers_free(headers);
 
@@ -392,20 +366,13 @@ struct post_get_comments_args {
 void* post_get_comments_helper(struct post_get_comments_args* args) {
     Headers_t* headers = args->post->subreddit->reddit->get_headers();
 
-    char* url = (char*) calloc(512+strlen(args->post->id), sizeof(char));
-
-    sprintf(url, "https://oauth.reddit.com/comments/%s", args->post->id.c_str());
+    std::string url = "https://oauth.reddit.com/comments/" + args->post->id;
 
     if(args->limit != -1){
-        strcat(url, "?limit=");
-        char* limit_a = (char*) calloc(8, sizeof(char));
-        sprintf(limit_a, "%zu", args->limit);
-        strcat(url, limit_a);
-        free(limit_a);
+        url += "?limit=" + std::to_string(args->limit);
     }
 
-
-    Res_t* raw = req_get(url, 0, NULL, headers);
+    Res_t* raw = req_get(url.c_str(), 0, NULL, headers);
 
     headers_free(headers);
 
@@ -463,10 +430,10 @@ typedef void*(*pthread_cb)(void*);
 int reddit_get_posts_hot_t(Reddit *reddit, unsigned long limit, std::string after, post_cb callback, void *ptr) {
     pthread_t thread;
 
-    struct get_post_hot_args* args = (struct get_post_hot_args*) malloc(sizeof(struct get_post_hot_args));
+    get_post_hot_args* args = (get_post_hot_args*) malloc(sizeof(get_post_hot_args));
     args->reddit = reddit;
     args->limit = limit;
-    args->before = after;
+    args->after = after;
     args->callback = callback;
     args->ptr = ptr;
 
@@ -478,12 +445,12 @@ int reddit_get_posts_hot_t(Reddit *reddit, unsigned long limit, std::string afte
 int Subreddit::get_posts_t(std::string type, unsigned long limit, std::string after, post_cb callback, void *ptr) {
     pthread_t thread;
 
-    subreddit_get_posts_args* args = (subreddit_get_posts_args*) malloc(sizeof(struct subreddit_get_posts_args));
+    subreddit_get_posts_args* args = (subreddit_get_posts_args*) malloc(sizeof(subreddit_get_posts_args));
     args->reddit = reddit;
     args->subreddit = this;
     args->type = type;
     args->limit = limit;
-    args->before = after;
+    args->after = after;
     args->callback = callback;
     args->ptr = ptr;
 
@@ -495,7 +462,7 @@ int Subreddit::get_posts_t(std::string type, unsigned long limit, std::string af
 int Post::get_comments_t(unsigned long limit, std::string after, comment_cb callback, void *ptr) {
     pthread_t thread;
 
-    post_get_comments_args* args = (post_get_comments_args*) malloc(sizeof(struct post_get_comments_args));
+    post_get_comments_args* args = (post_get_comments_args*) malloc(sizeof(post_get_comments_args));
     args->post = this;
     args->limit = limit;
     args->after = after;

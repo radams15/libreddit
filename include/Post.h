@@ -28,13 +28,13 @@ public:
     int get_comments(unsigned long limit, std::string after, comment_cb callback, void* ptr);
 
     int get_comments_t(unsigned long limit, std::string after, comment_cb callback, void *ptr);
+
+    std::string fullname();
+    std::string full_url();
+
+    bool is_img();
 };
 
 typedef void (*post_cb)(Post*, void*);
-
-std::string post_fullname(Post* post);
-std::string post_url(Post* post);
-
-int post_is_img(Post* post);
 
 #endif //LIBREDDIT_POST_H

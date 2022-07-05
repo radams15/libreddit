@@ -18,8 +18,7 @@
 
 class Reddit {
 public:
-    std::string username;
-    int authenticated;
+    bool authenticated;
 
     Reddit(std::string username, std::string password, std::string client_id, std::string secret);
     Reddit(std::string username, std::string token);
@@ -32,9 +31,6 @@ public:
     std::vector<Post*> get_posts_hot_list(unsigned long limit, std::string after);
 
 private:
-    std::string client_id;
-    std::string client_secret;
-    std::string password;
     std::string token;
 
     int login(std::string username, std::string password, std::string client_id, std::string secret);

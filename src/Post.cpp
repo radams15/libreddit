@@ -10,26 +10,17 @@
 #include <string.h>
 #include <stdio.h>
 
-std::string post_fullname(Post* post) {
-    char* out = (char*) calloc(post->id.length()+post->type.length()+1, sizeof(char));
-
-    sprintf(out, "%s_%s", post->type.c_str(), post->id.c_str());
-
-    return out;
+std::string Post::fullname() {
+    return type + "_" + id;
 }
 
-std::string post_url(Post* post) {
-    char* out = (char*) calloc(strlen(post->id.c_str())+64, sizeof(char));
-
-    sprintf(out, "https://reddit.com/%s", post->id.c_str());
-
-    return out;
+std::string Post::full_url() {
+    return "https://reddit.com/" + id;
 }
 
-#define CONTAINS(haystack, needle) (strstr(haystack.c_str(), needle) != NULL)
-
-int post_is_img(Post* post) {
-    return CONTAINS(post->url, ".png")
-        || CONTAINS(post->url, ".jpg")
-        || CONTAINS(post->url, ".gif");
+#define CONTAINS(haystack, needle) ((haystack).find(needle) != std::string::npos)
+bool Post::is_img() {
+    return CONTAINS(url, ".png")
+        || CONTAINS(url, ".jpg")
+        || CONTAINS(url, ".gif");
 }
