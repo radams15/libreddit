@@ -11,7 +11,6 @@ add_subdirectory(lib/librequest)
 
 add_library(reddit SHARED src/Reddit.cpp include/Reddit.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.cpp include/Post.h src/Subreddit.cpp include/Subreddit.h src/Comment.cpp include/Comment.h)
 
-target_include_directories(reddit PRIVATE ${LIBREQ_HEADERS} include lib/cJSON lib/librequest/include lib/)
 target_link_libraries(reddit PRIVATE request)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -28,3 +27,5 @@ if(BUILD_TEST)
     target_link_libraries(redd PRIVATE reddit)
     target_include_directories(redd PRIVATE include)
 endif()
+
+include_directories(${LIBREQ_HEADERS} include lib/cJSON lib/librequest/include lib/)

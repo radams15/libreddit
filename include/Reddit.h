@@ -12,6 +12,7 @@
 #include <Comment.h>
 
 #include <string>
+#include <cJSON.h>
 
 class Reddit {
 public:
@@ -38,5 +39,7 @@ private:
     int login(std::string username, std::string password, std::string client_id, std::string secret);
     int get_login_status();
 };
+
+Post* process_post(Reddit* reddit, cJSON* child);
 
 #endif //LIBREDDIT_REDDIT_H
