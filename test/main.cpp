@@ -1,17 +1,8 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include <Reddit.h>
-#include <unistd.h>
-#include <string.h>
 
 #include "SECRETS.h"
-
-void post_got(Post* post, void* ptr){
-    printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
-    if(post->is_img()){
-        printf("\tImage: %s\n", post->url.c_str());
-    }
-}
 
 void comment_recurse(Comment* comment, int level){
     printf("Comment by '%s' ====> '%s'\n\n--------------------------------------\n", comment->author.c_str(), comment->body.c_str());
@@ -30,6 +21,13 @@ void comment_got(Comment* comment, void* ptr, int is_title){
         printf("Title Page: %s (%s) - thumbnail: %s\n\n", comment->title.c_str(), comment->url.c_str(), comment->thumbnail.c_str());
     }else {
         comment_recurse(comment, 1);
+    }
+}
+
+void post_got(Post* post, void* ptr) {
+    printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
+    if (post->is_img()) {
+        printf("\tImage: %s\n", post->url.c_str());
     }
 }
 
