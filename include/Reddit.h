@@ -13,9 +13,6 @@
 
 #include <string>
 
-#define AUTHENTICATED 1
-#define UNAUTHENTICATED 0
-
 class Reddit {
 public:
     bool authenticated;
@@ -29,6 +26,11 @@ public:
 
     std::vector<Subreddit*> get_subbed_list();
     std::vector<Post*> get_posts_hot_list(unsigned long limit, std::string after);
+
+    enum {
+        AUTHENTICATED = true,
+        UNAUTHENTICATED = false
+    };
 
 private:
     std::string token;

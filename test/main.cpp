@@ -34,7 +34,7 @@ void post_got(Post* post, void* ptr) {
 int main() {
     Reddit reddit(USERNAME, PASSWD, CID, SECRET);
 
-    if(reddit.authenticated == UNAUTHENTICATED){
+    if(reddit.authenticated == Reddit::UNAUTHENTICATED){
         fprintf(stderr, "Failed to login!\n");
     }
 
