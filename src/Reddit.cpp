@@ -2,8 +2,6 @@
 // Created by Rhys on 13/03/2022.
 //
 
-#define PRIVATE
-
 #include <Reddit.h>
 #include <request.h>
 
@@ -13,22 +11,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <vector>
+#include "Subreddit.h"
 
-void* iptr(int res){
-    int* out = malloc(sizeof(int));
-    *out = res;
-
-    return (void*) out;
+int strlen(std::string str){
+    return str.length();
 }
 
-Headers_t* get_headers(Reddit_t* reddit){
+struct Headers* Reddit::get_headers(){
     Headers_t* out = NULL;
 
     out = headers_append(out, "User-Agent", "libredd/0.0.1");
 
-    if(reddit->authenticated){
-        char* auth = calloc(strlen(reddit->token)+32, sizeof(char));
-        sprintf(auth, "bearer %s", reddit->token);
+    if(authenticated){
+        char* auth = (char*) calloc(strlen(token)+32, sizeof(char));
+        sprintf(auth, "bearer %s", token.c_str());
         headers_append(out, "Authorization", auth);
         free(auth);
     }
@@ -36,17 +33,19 @@ Headers_t* get_headers(Reddit_t* reddit){
     return out;
 }
 
-int login(Reddit_t* reddit, const char *username, const char *password, const char *client_id, const char *secret){
-    char* data = calloc(strlen(username)+strlen(password)+64, sizeof(char));
+int Reddit::login(std::string username, std::string password, std::string client_id, std::string secret){
+    char* data = (char*) calloc(strlen(username)+strlen(password)+64, sizeof(char));
 
-    sprintf(data, "grant_type=password&username=%s&password=%s", username, password);
+    sprintf(data, "grant_type=password&username=%s&password=%s", username.c_str(), password.c_str());
 
-    Headers_t* headers = get_headers(reddit);
+    Headers_t* headers = get_headers();
 
-    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
+    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", 0, NULL, data, headers, client_id.c_str(), secret.c_str());
 
     headers_free(headers);
     free(data);
+
+    printf("%s\n", raw->data);
 
     cJSON* json = cJSON_Parse(raw->data);
 
@@ -56,38 +55,34 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
         return EXIT_FAILURE;
     }
 
-    reddit->token = cJSON_GetStringValue(cJSON_GetObjectItem(json, "access_token"));
+    token = cJSON_GetStringValue(cJSON_GetObjectItem(json, "access_token"));
 
     return EXIT_SUCCESS;
 }
 
-Reddit_t* reddit_new(const char* username, const char *password, const char *client_id, const char *secret) {
-    Reddit_t* out = malloc(sizeof(Reddit_t));
+Reddit::Reddit(std::string username, std::string password, std::string client_id, std::string secret) {
+    authenticated = 0;
 
-    out->use_proxy = 0;
-    out->proxy = strdup("http://http.therhys.co.uk/yt/proxy.php?url=");
-    out->authenticated = 0;
+    this->username = username;
+    this->password = password;
+    this->client_id = client_id;
+    this->client_secret = secret;
 
-    if(login(out, username, password, client_id, secret) == EXIT_SUCCESS){
-        out->authenticated = 1;
-        return out;
+    if(login(username, password, client_id, secret) == EXIT_SUCCESS){
+        authenticated = 1;
+    }else {
+        fprintf(stderr, "Failed to login to reddit.");
     }
-
-    fprintf(stderr, "Failed to login to reddit.");
-
-    out->authenticated = 0;
-
-    return out;
 }
 
-int reddit_get_login_status(Reddit_t* reddit){
-    Headers_t* headers = get_headers(reddit);
+int Reddit::get_login_status(){
+    Headers_t* headers = get_headers();
 
-    char* url = calloc(512, sizeof(char));
+    char* url = (char*) calloc(512, sizeof(char));
 
     strcpy(url, "https://oauth.reddit.com/api/v1/scopes");
 
-    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get(url, false, NULL, headers);
 
     headers_free(headers);
 
@@ -96,39 +91,32 @@ int reddit_get_login_status(Reddit_t* reddit){
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
 
-        res_free((void*) raw);
+        res_free(raw);
 
         return UNAUTHENTICATED;
     }
 
-    res_free((void*) raw);
+    res_free(raw);
 
     return AUTHENTICATED;
 }
 
-Reddit_t* reddit_new_with_token(const char *username, const char* token) {
-    Reddit_t* out = malloc(sizeof(Reddit_t));
+Reddit::Reddit(std::string username, std::string token) {
+    authenticated = 1; // Just so that get_headers uses the token anyway.
 
-    out->use_proxy = 0;
-    out->authenticated = 1; // Just so that get_headers uses the token anyway.
+    this->token = token;
 
-    out->token = strdup(token);
-
-    out->proxy = strdup("http://http.therhys.co.uk/yt/proxy.php?url=");
-
-    out->authenticated = reddit_get_login_status(out);
-
-    return out;
+    authenticated = get_login_status();
 }
 
-Post_t* process_post(cJSON* child){
+Post* process_post(Reddit* reddit, cJSON* child){
     cJSON* child_data = cJSON_GetObjectItem(child, "data");
 
-    Post_t* post = malloc(sizeof(Post_t));
+    Post* post = new Post();
 
     post->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
     post->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author"));
-    post->subreddit = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit"));
+    post->subreddit = new Subreddit(reddit, cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "subreddit")));
     post->text = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "selftext"));
     post->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
     post->upvotes = cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "ups"));
@@ -138,50 +126,50 @@ Post_t* process_post(cJSON* child){
     post->type = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
     post->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
 
-    const char* thumb = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
-    if(strcmp(thumb, "self") != 0){
+    std::string thumb = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
+    if(thumb == "self"){
         post->thumbnail = thumb;
     }else{
-        post->thumbnail = NULL;
+        post->thumbnail = "";
     }
 
     return post;
 }
 
 struct get_post_hot_args {
-    Reddit_t *reddit;
+    Reddit* reddit;
     unsigned long limit;
-    const char *before;
+    std::string before;
     post_cb callback;
     void* ptr;
 };
 
 void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
-    Headers_t* headers = get_headers(args->reddit);
+    Headers_t* headers = args->reddit->get_headers();
 
-    char* url = calloc(512, sizeof(char));
+    char* url = (char*) calloc(512, sizeof(char));
 
     strcpy(url, "https://oauth.reddit.com/hot");
 
     if(args->limit != -1){
         strcat(url, "?limit=");
-        char* limit_a = calloc(8, sizeof(char));
+        char* limit_a = (char*) calloc(8, sizeof(char));
         sprintf(limit_a, "%zu", args->limit);
         strcat(url, limit_a);
         free(limit_a);
     }
 
-    if(args->before != NULL) {
+    if(! args->before.empty()) {
         if (args->limit != -1) {
             strcat(url, "&after=");
         } else if (args->limit == -1) {
             strcat(url, "?after=");
         }
 
-        strcat(url, args->before);
+        strcat(url, args->before.c_str());
     }
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, 0, NULL, headers);
 
     headers_free(headers);
 
@@ -190,7 +178,7 @@ void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
 
-        return EXIT_FAILURE;
+        return (void*) EXIT_FAILURE;
     }
 
     cJSON* data = cJSON_GetObjectItem(json, "data");
@@ -198,66 +186,68 @@ void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
 
     cJSON* child;
     cJSON_ArrayForEach(child, children){
-        Post_t* post = process_post(child);
+        Post* post = process_post(args->reddit, child);
 
         args->callback(post, args->ptr);
     }
 
     res_free(raw);
 
-    return iptr(EXIT_SUCCESS);
+    return (void*)EXIT_SUCCESS;
 }
 
-int reddit_get_posts_hot(Reddit_t *reddit, unsigned long limit, const char *before, post_cb callback, void* ptr) {
+int Reddit::get_posts_hot(unsigned long limit, std::string before, post_cb callback, void* ptr) {
     struct get_post_hot_args args = {
-            reddit,
+            this,
             limit,
             before,
             callback,
             ptr
     };
 
-    return reddit_get_posts_hot_helper(&args);
+    reddit_get_posts_hot_helper((struct get_post_hot_args*) &args);
+
+    return (int) EXIT_SUCCESS;
 }
 
 
 
 struct subreddit_get_posts_args {
-    Reddit_t *reddit;
-    Subreddit_t *subreddit;
-    const char* type;
+    Reddit* reddit;
+    Subreddit* subreddit;
+    std::string type;
     unsigned long limit;
-    const char *before;
+    std::string before;
     post_cb callback;
     void* ptr;
 };
 
 void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
-    Headers_t* headers = get_headers(args->reddit);
+    Headers_t* headers = args->reddit->get_headers();
 
-    char* url = calloc(512+strlen(args->type), sizeof(char));
+    char* url = (char*) calloc(512+strlen(args->type), sizeof(char));
 
-    sprintf(url, "https://oauth.reddit.com/r/%s/%s", args->subreddit->name, args->type);
+    sprintf(url, "https://oauth.reddit.com/r/%s/%s", args->subreddit->name.c_str(), args->type.c_str());
 
     if(args->limit != -1){
         strcat(url, "?limit=");
-        char* limit_a = calloc(8, sizeof(char));
+        char* limit_a = (char*) calloc(8, sizeof(char));
         sprintf(limit_a, "%zu", args->limit);
         strcat(url, limit_a);
         free(limit_a);
     }
 
-    if(args->before != NULL) {
+    if(! args->before.empty()) {
         if (args->limit != -1) {
             strcat(url, "&after=");
         } else if (args->limit == -1) {
             strcat(url, "?after=");
         }
 
-        strcat(url, args->before);
+        strcat(url, args->before.c_str());
     }
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, 0, NULL, headers);
 
     headers_free(headers);
 
@@ -266,7 +256,7 @@ void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
     if(cJSON_GetArraySize(json) == 0){
         cJSON_free(json);
 
-        return EXIT_FAILURE;
+        return (void*) EXIT_FAILURE;
     }
 
     cJSON* data = cJSON_GetObjectItem(json, "data");
@@ -274,21 +264,21 @@ void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
 
     cJSON* child;
     cJSON_ArrayForEach(child, children){
-        Post_t* post = process_post(child);
+        Post* post = process_post(args->reddit, child);
 
         args->callback(post, args->ptr);
     }
 
     res_free(raw);
 
-    return iptr(EXIT_SUCCESS);
+    return (void*) EXIT_SUCCESS;
 }
 
-int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* type, unsigned long limit, const char *before, post_cb callback,
+int Subreddit::get_posts(std::string type, unsigned long limit, std::string before, post_cb callback,
                         void *ptr) {
     struct subreddit_get_posts_args args = {
             reddit,
-            subreddit,
+            this,
             type,
             limit,
             before,
@@ -296,15 +286,17 @@ int subreddit_get_posts(Reddit_t *reddit, Subreddit_t *subreddit, const char* ty
             ptr
     };
 
-    return subreddit_get_posts_helper(&args);
+    subreddit_get_posts_helper((struct subreddit_get_posts_args*) &args);
+
+    return (int) EXIT_SUCCESS;
 }
 
-List_t* reddit_get_subbed_list(Reddit_t *reddit) {
-    List_t* out = LIST(Subreddit_t, (freer_cb) subreddit_free);
+std::vector<Subreddit*> Reddit::get_subbed_list() {
+    std::vector<Subreddit*> out;
 
-    Headers_t* headers = get_headers(reddit);
+    Headers_t* headers = get_headers();
 
-    Res_t* raw = req_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", 0, NULL, headers);
 
     headers_free(headers);
 
@@ -323,13 +315,12 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     cJSON_ArrayForEach(child, children) {
         cJSON *child_data = cJSON_GetObjectItem(child, "data");
 
-        const char* url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
-        const char* name = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "display_name"));
+        std::string url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
+        std::string name = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "display_name"));
 
-        Subreddit_t* sub = subreddit_new(name);
-        sub->url = url;
+        Subreddit* sub = new Subreddit(this, name, url);
 
-        list_append(out, sub);
+        out.push_back(sub);
     }
 
     res_free(raw);
@@ -337,7 +328,7 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
     return out;
 }
 
-void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Comment_t* parent){
+void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Comment* parent){
     cJSON* data = cJSON_GetObjectItem(listing, "data");
     cJSON* children = cJSON_GetObjectItem(data, "children");
 
@@ -345,11 +336,11 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
 
     cJSON_ArrayForEach(child, children) {
         //printf("%s\n", cJSON_Print(cJSON_GetObjectItem(child, "data"))); // the first returned is t3 that is post info. The rest are t1 which are comments.
-        const char* kind = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
+        std::string kind = cJSON_GetStringValue(cJSON_GetObjectItem(child, "kind"));
         cJSON* child_data = cJSON_GetObjectItem(child, "data");
 
-        if(strcmp(kind, "t3") == 0){
-            Comment_t* out = (Comment_t*) malloc(sizeof(Comment_t));
+        if(kind == "t3") {
+            Comment* out = new Comment;
 
             out->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
             out->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
@@ -360,10 +351,10 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
             out->thumbnail = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
 
             callback(out, ptr, 1);
-        }else if(strcmp(kind, "t1") == 0){
-            Comment_t* out = (Comment_t*) malloc(sizeof(Comment_t));
+        }else if(kind == "t1") {
+            Comment* out = new Comment;
             out->no_children = 0;
-            out->children = malloc(0);
+            out->children = (void**) malloc(0);
 
             out->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
             out->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
@@ -378,7 +369,7 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
 
             if(parent != NULL){
                 parent->no_children++;
-                parent->children = realloc(parent->children, (parent->no_children)*sizeof(Comment_t*));
+                parent->children = (void**) realloc(parent->children, (parent->no_children)*sizeof(Comment*));
 
                 parent->children[parent->no_children-1] = out;
             }else{
@@ -390,31 +381,30 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
 }
 
 struct post_get_comments_args {
-    Reddit_t* reddit;
-    Post_t* post;
+    Post* post;
     unsigned long limit;
-    const char* after;
+    std::string after;
     comment_cb callback;
     void* ptr;
 };
 
 void* post_get_comments_helper(struct post_get_comments_args* args) {
-    Headers_t* headers = get_headers(args->reddit);
+    Headers_t* headers = args->post->subreddit->reddit->get_headers();
 
-    char* url = calloc(512+strlen(args->post->id), sizeof(char));
+    char* url = (char*) calloc(512+strlen(args->post->id), sizeof(char));
 
-    sprintf(url, "https://oauth.reddit.com/comments/%s", args->post->id);
+    sprintf(url, "https://oauth.reddit.com/comments/%s", args->post->id.c_str());
 
     if(args->limit != -1){
         strcat(url, "?limit=");
-        char* limit_a = calloc(8, sizeof(char));
+        char* limit_a = (char*) calloc(8, sizeof(char));
         sprintf(limit_a, "%zu", args->limit);
         strcat(url, limit_a);
         free(limit_a);
     }
 
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, 0, NULL, headers);
 
     headers_free(headers);
 
@@ -427,90 +417,91 @@ void* post_get_comments_helper(struct post_get_comments_args* args) {
 
     res_free(raw);
 
-    return iptr(EXIT_SUCCESS);
+    return (void*)EXIT_SUCCESS;
 }
 
-int post_get_comments(Reddit_t* reddit, Post_t* post, unsigned long limit, const char* after, comment_cb callback, void* ptr) {
+int Post::get_comments(unsigned long limit, std::string after, comment_cb callback, void* ptr) {
     struct post_get_comments_args args = {
-            reddit,
-            post,
+            this,
             limit,
             after,
             callback,
             ptr
     };
 
-    return post_get_comments_helper(&args);
+    post_get_comments_helper((struct post_get_comments_args*) &args);
+
+    return EXIT_SUCCESS;
 }
 
+template<class T>
 void list_adder(void* item, void* ptr){
-    list_append((List_t*) ptr, item);
+    ((std::vector<T>*)ptr)->push_back((T) item);
 }
 
-List_t* reddit_get_posts_hot_list(Reddit_t *reddit, unsigned long limit, const char *after) {
-    List_t* out = LIST(Post_t, post_free);
+std::vector<Post*> Reddit::get_posts_hot_list(unsigned long limit, std::string after) {
+    std::vector<Post*> out;
 
-    reddit_get_posts_hot(reddit, limit, after, list_adder, (void*) out);
+    get_posts_hot(limit, after, (post_cb) list_adder<Post*>, (void*) &out);
 
     return out;
 }
 
-List_t* subreddit_get_posts_list(Reddit_t *reddit, Subreddit_t *subreddit, const char *type, unsigned long limit,
-                                 const char *after) {
-    List_t* out = LIST(Post_t, post_free);
+std::vector<Post*> Subreddit::get_posts_list(std::string type, unsigned long limit, std::string after) {
+    std::vector<Post*> out;
 
-    subreddit_get_posts(reddit, subreddit, type, limit, after, list_adder, (void*) out);
+    get_posts(type, limit, after, (post_cb) list_adder<Post*>, (void*) &out);
 
     return out;
 }
+
+typedef void*(*pthread_cb)(void*);
 
 #if ENABLE_THREADING
-int reddit_get_posts_hot_t(Reddit_t *reddit, unsigned long limit, const char *after, post_cb callback, void *ptr) {
+
+int reddit_get_posts_hot_t(Reddit *reddit, unsigned long limit, std::string after, post_cb callback, void *ptr) {
     pthread_t thread;
 
-    struct get_post_hot_args* args = malloc(sizeof(struct get_post_hot_args));
+    struct get_post_hot_args* args = (struct get_post_hot_args*) malloc(sizeof(struct get_post_hot_args));
     args->reddit = reddit;
     args->limit = limit;
     args->before = after;
     args->callback = callback;
     args->ptr = ptr;
 
-    int res = pthread_create(&thread, NULL, &reddit_get_posts_hot_helper, args);
+    int res = pthread_create(&thread, NULL, (pthread_cb) &reddit_get_posts_hot_helper, args);
 
     return res;
 }
 
-int subreddit_get_posts_t(Reddit_t *reddit, Subreddit_t *subreddit, const char *type, unsigned long limit,
-                          const char *after, post_cb callback, void *ptr) {
+int Subreddit::get_posts_t(std::string type, unsigned long limit, std::string after, post_cb callback, void *ptr) {
     pthread_t thread;
 
-    struct subreddit_get_posts_args* args = malloc(sizeof(struct subreddit_get_posts_args));
+    subreddit_get_posts_args* args = (subreddit_get_posts_args*) malloc(sizeof(struct subreddit_get_posts_args));
     args->reddit = reddit;
-    args->subreddit = subreddit;
+    args->subreddit = this;
     args->type = type;
     args->limit = limit;
     args->before = after;
     args->callback = callback;
     args->ptr = ptr;
 
-    int res = pthread_create(&thread, NULL, &subreddit_get_posts, args);
+    int res = pthread_create(&thread, NULL, (pthread_cb) &subreddit_get_posts_helper, args);
 
     return res;
 }
 
-int post_get_comments_t(Reddit_t *reddit, Post_t *post, unsigned long limit, const char *after, comment_cb callback,
-                        void *ptr) {
+int Post::get_comments_t(unsigned long limit, std::string after, comment_cb callback, void *ptr) {
     pthread_t thread;
 
-    struct post_get_comments_args* args = malloc(sizeof(struct post_get_comments_args));
-    args->reddit = reddit;
-    args->post = post;
+    post_get_comments_args* args = (post_get_comments_args*) malloc(sizeof(struct post_get_comments_args));
+    args->post = this;
     args->limit = limit;
     args->after = after;
     args->callback = callback;
     args->ptr = ptr;
 
-    int res = pthread_create(&thread, NULL, &post_get_comments_helper, args);
+    int res = pthread_create(&thread, NULL, (pthread_cb) &post_get_comments_helper, args);
 
     return res;
 }

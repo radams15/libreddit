@@ -5,30 +5,24 @@
 #ifndef REDDIT_COMMENT_H
 #define REDDIT_COMMENT_H
 
-#include "API.h"
+class Post;
 
-typedef struct Comment {
-    const char* title;
-    const char* author;
-    const char* body;
+#include <string>
+
+struct Comment {
+    Post* post;
+
+    std::string title;
+    std::string author;
+    std::string body;
     unsigned long score;
-    const char* id;
-    const char* thumbnail;
-    const char* url;
+    std::string id;
+    std::string thumbnail;
+    std::string url;
     void** children;
     unsigned long no_children;
-} Comment_t;
+};
 
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-typedef void (*comment_cb)(Comment_t *, void *, int);
-
-LIBRARY_API void comment_free(Comment_t *comment);
-
-#ifdef __cplusplus
-}
-#endif
+typedef void (*comment_cb)(Comment*, void *, int);
 
 #endif //REDDIT_COMMENT_H

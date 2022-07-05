@@ -20,6 +20,7 @@
 
 
 
+
 typedef void(* freer_cb)(void*);
 
 typedef struct List{
@@ -47,6 +48,7 @@ typedef struct Post{
     const char* subreddit;
     const char* text;
     const char* thumbnail;
+    const char* url;
     unsigned long upvotes;
     unsigned long downvotes;
     unsigned long score;
@@ -60,6 +62,8 @@ typedef struct Post{
 
  const char* post_fullname(Post_t* post);
  const char* post_url(Post_t* post);
+
+ int post_is_img(Post_t* post);
 
  void post_free(Post_t* post);
 

@@ -5,26 +5,29 @@
 #ifndef LIBREDDIT_SUBREDDIT_H
 #define LIBREDDIT_SUBREDDIT_H
 
-#include "API.h"
+#include "Post.h"
 
-#ifdef __cplusplus
-extern "C"{
-#endif
+#include <string>
 
-typedef struct Subreddit {
-    const char* name;
+class Reddit;
+
+class Subreddit {
+public:
+    std::string name;
     unsigned long subs;
-#ifdef PRIVATE
-    const char* url;
-#endif
-} Subreddit_t;
+    Reddit* reddit;
 
-LIBRARY_API Subreddit_t* subreddit_new(const char* name);
+    Subreddit(Reddit* reddit, std::string name, std::string url);
+    Subreddit(Reddit* reddit, std::string name);
 
-LIBRARY_API void subreddit_free(Subreddit_t* subreddit);
+    int get_posts(std::string type, unsigned long limit, std::string before, post_cb callback, void *ptr);
 
-#ifdef __cplusplus
-}
-#endif
+    std::vector<Post*> get_posts_list(std::string type, unsigned long limit, std::string after);
+
+    int get_posts_t(std::string type, unsigned long limit, std::string after, post_cb callback, void *ptr);
+
+private:
+    std::string url;
+};
 
 #endif //LIBREDDIT_SUBREDDIT_H
