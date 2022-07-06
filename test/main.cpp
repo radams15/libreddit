@@ -7,8 +7,8 @@
 void comment_recurse(Comment* comment, int level){
     printf("Comment by '%s' ====> '%s'\n\n--------------------------------------\n", comment->author.c_str(), comment->body.c_str());
 
-    for(int i=0 ; i<comment->no_children ; i++){
-        Comment* child = (Comment*) comment->children[i];
+    for(int i=0 ; i<comment->children.size() ; i++){
+        Comment* child = comment->children.at(i);
         for(int x=0 ; x<level ; x++) {
             printf("\t");
         }
@@ -25,16 +25,13 @@ void comment_got(Comment* comment, void* ptr, int is_title){
 }
 
 void post_got(Post* post, void* ptr) {
-    printf("Post '%s' by '%s' in 'r/%s'\n", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
-    if (post->is_img()) {
-        printf("\tImage: %s\n", post->url.c_str());
-    }
+    printf("Post '%s' by '%s' in 'r/%s'", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
+    if(post->is_img()) {
+        std::string path = post->get_image_path();
 
-    auto comments = post->get_comments_list(10, "");
-
-    for(Comment * c : comments){
-        printf("\t%s\n", c->body.c_str());
+        printf("\tImage: %s\n", path.c_str());
     }
+    printf("\n\n");
 }
 
 int main() {

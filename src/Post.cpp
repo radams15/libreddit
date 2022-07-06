@@ -62,8 +62,6 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
             callback(out, ptr, 1);
         }else if(kind == "t1") {
             Comment* out = new Comment;
-            out->no_children = 0;
-            out->children = (void**) malloc(0);
 
 #define GET_STR(json, key) cJSON_GetObjectItem(child_data, key) != NULL? cJSON_GetStringValue(cJSON_GetObjectItem(child_data, key)) : "ERROR"
 #define GET_NUM(json, key) cJSON_GetObjectItem(child_data, key) != NULL? cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, key)) : 0
@@ -80,10 +78,7 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
             process_comment_listing(replies, callback, ptr, out);
 
             if(parent != NULL){
-                parent->no_children++;
-                parent->children = (void**) realloc(parent->children, (parent->no_children)*sizeof(Comment*));
-
-                parent->children[parent->no_children-1] = out;
+                parent->children.push_back(out);
             }else{
                 callback(out, ptr, 0);
             }

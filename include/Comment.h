@@ -8,6 +8,7 @@
 class Post;
 
 #include <string>
+#include <vector>
 
 struct Comment {
     Post* post;
@@ -19,8 +20,7 @@ struct Comment {
     std::string id;
     std::string thumbnail;
     std::string url;
-    void** children;
-    unsigned long no_children;
+    std::vector<Comment*> children;
 };
 
 typedef void (*comment_cb)(Comment*, void *, int);
