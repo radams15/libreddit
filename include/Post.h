@@ -34,8 +34,6 @@ public:
     std::string fullname();
     std::string full_url();
 
-    std::string get_save_path();
-    std::string get_cache_path();
     std::string get_image_path();
 
     std::string get_thumb_path();

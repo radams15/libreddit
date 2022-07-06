@@ -157,7 +157,7 @@ std::string Post::get_image_path() {
 
     std::string uid = id + "." + FileUtils::get_extension(url);
 
-    std::string save_path = get_cache_path() + "/" + uid;
+    std::string save_path = FileUtils::get_cache_path() + "/" + uid;
 
     if(!FileUtils::exists(save_path)){
         int fail = req_get_dl(url.c_str(), save_path.c_str(), 0, "", subreddit->reddit->get_headers());
@@ -176,12 +176,12 @@ std::string Post::get_thumb_path() {
     }
 
     if(thumbnail == "nsfw" || thumbnail == "spoiler"){
-        return get_cache_path() + "/" + thumbnail + ".png";
+        return FileUtils::get_cache_path() + "/" + thumbnail + ".png";
     }
 
     std::string uid = id + "_thumb." + FileUtils::get_extension(thumbnail);
 
-    std::string save_path = get_cache_path() + "/" + uid;
+    std::string save_path = FileUtils::get_cache_path() + "/" + uid;
 
     if(!FileUtils::exists(save_path)){
         int fail = req_get_dl(thumbnail.c_str(), save_path.c_str(), 0, "", subreddit->reddit->get_headers());
@@ -194,30 +194,6 @@ std::string Post::get_thumb_path() {
     return save_path;
 }
 
-
-std::string Post::get_save_path() {
-#if defined(__APPLE__)
-    return "/Users/"+FileUtils::get_username() + "/Library/JReddit/";
-#elif defined(__UNIX__)
-    return "/home/"+FileUtils::get_username() + "/.config/JReddit/";
-#elif defined(WIN32)
-    return "/JReddit/";
-#else
-    #error Cannot determine OS (get_save_path)!
-#endif
-}
-
-std::string Post::get_cache_path() {
-#if defined(__APPLE__)
-    return "/Users/"+FileUtils::get_username() + "/Library/JReddit/cache/";
-#elif defined(__UNIX__)
-    return "/home/"+FileUtils::get_username() + "/.cache/JReddit/";
-#elif defined(WIN32)
-    return "/JReddit/cache/";
-#else
-    #error Cannot determine OS (get_save_path)!
-#endif
-}
 
 void comments_list_adder(Comment* item, void* ptr, int is_title){
     ((std::vector<Comment*>*)ptr)->push_back(item);

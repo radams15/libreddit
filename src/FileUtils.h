@@ -13,6 +13,11 @@ namespace FileUtils {
     std::string get_username();
 
     bool exists(std::string path);
+
+    std::string get_save_path();
+    std::string get_cache_path();
+
+    std::string read(std::string path);
 }
 
 #endif //REDDIT_FILEUTILS_H

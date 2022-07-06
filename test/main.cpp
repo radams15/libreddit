@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include <Reddit.h>
+#include <Client.h>
 
 #include "SECRETS.h"
 
@@ -33,19 +33,16 @@ void post_got(Post* post, void* ptr) {
 }
 
 int main() {
-    Reddit reddit(USERNAME, PASSWD, CID, SECRET);
+    Client client;
 
-    if(reddit.authenticated == Reddit::UNAUTHENTICATED){
+    Reddit* reddit = client.getReddit();
+
+    if(reddit->authenticated == Reddit::UNAUTHENTICATED){
         fprintf(stderr, "Failed to login!\n");
+        return 1;
     }
 
-    reddit.get_posts_hot(100, "", post_got, NULL);
-
-    /*Post_t post;
-    post.id = strdup("t8o6cr");
-    post.subreddit = strdup("gnome");
-
-    post_get_comments(reddit, &post, -1, NULL, comment_got, NULL);*/
+    reddit->get_posts_hot(100, "", post_got, NULL);
 
     return 0;
 }

@@ -12,6 +12,7 @@
 
 %template(PostVector) std::vector<Post*>;
 %template(SubredditVector) std::vector<Subreddit*>;
+%template(CommentVector) std::vector<Comment*>;
 
 %include "../include/Reddit.h"
 %include "../include/Post.h"

@@ -14,6 +14,8 @@
 #endif
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 std::string FileUtils::get_username() {
 #if defined(__unix__) || defined(__APPLE__)
@@ -62,4 +64,41 @@ bool FileUtils::exists(std::string path) {
 #else
 #error Cannot determine OS (exists)!
 #endif
+}
+
+
+std::string FileUtils::get_save_path() {
+#if defined(__APPLE__)
+    return "/Users/"+get_username() + "/Library/JReddit/";
+#elif defined(__UNIX__)
+    return "/home/"+get_username() + "/.config/JReddit/";
+#elif defined(WIN32)
+    return "/JReddit/";
+#else
+    #error Cannot determine OS (get_save_path)!
+#endif
+}
+
+std::string FileUtils::get_cache_path() {
+#if defined(__APPLE__)
+    return "/Users/"+FileUtils::get_username() + "/Library/JReddit/cache/";
+#elif defined(__UNIX__)
+    return "/home/"+FileUtils::get_username() + "/.cache/JReddit/";
+#elif defined(WIN32)
+    return "/JReddit/cache/";
+#else
+    #error Cannot determine OS (get_save_path)!
+#endif
+}
+
+std::string FileUtils::read(std::string path) {
+    std::ifstream in(path);
+
+    std::stringstream out;
+
+    out << in.rdbuf();
+
+    in.close();
+
+    return out.str();
 }

@@ -9,7 +9,7 @@ option(ENABLE_THREADING "Enables threading methods using pthread" ON)
 
 add_subdirectory(lib/librequest)
 
-add_library(reddit SHARED src/Reddit.cpp include/Reddit.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.cpp include/Post.h src/Subreddit.cpp include/Subreddit.h src/Comment.cpp include/Comment.h src/FileUtils.cpp src/FileUtils.h)
+add_library(reddit SHARED src/Reddit.cpp include/Reddit.h lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c src/Post.cpp include/Post.h src/Subreddit.cpp include/Subreddit.h src/Comment.cpp include/Comment.h src/FileUtils.cpp src/FileUtils.h src/Client.cpp src/Client.h)
 
 target_link_libraries(reddit PRIVATE request)
 

@@ -7,9 +7,8 @@
 
 #include <cJSON.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
 #include <pthread.h>
 #include <vector>
 
@@ -24,7 +23,7 @@ struct Headers* Reddit::get_headers(){
 
     out = headers_append(out, "User-Agent", "libredd/0.0.1");
 
-    if(authenticated){
+    if(authenticated == AUTHENTICATED){
         std::string auth = "bearer " + token;
         headers_append(out, "Authorization", auth.c_str());
     }
@@ -55,10 +54,10 @@ int Reddit::login(std::string username, std::string password, std::string client
 }
 
 Reddit::Reddit(std::string username, std::string password, std::string client_id, std::string secret) {
-    authenticated = 0;
+    authenticated = UNAUTHENTICATED;
 
     if(login(username, password, client_id, secret) == EXIT_SUCCESS){
-        authenticated = true;
+        authenticated = AUTHENTICATED;
     }else {
         fprintf(stderr, "Failed to login to reddit.");
     }
@@ -89,7 +88,7 @@ int Reddit::get_login_status(){
 }
 
 Reddit::Reddit(std::string username, std::string token) {
-    authenticated = true; // Just so that get_headers uses the token anyway.
+    authenticated = AUTHENTICATED; // Just so that get_headers uses the token anyway.
 
     this->token = token;
 
