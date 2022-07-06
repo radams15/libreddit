@@ -115,9 +115,9 @@ Post* process_post(Reddit* reddit, cJSON* child){
 
     std::string thumb = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "thumbnail"));
     if(thumb == "self"){
-        post->thumbnail = thumb;
-    }else{
         post->thumbnail = "";
+    }else{
+        post->thumbnail = thumb;
     }
 
     return post;

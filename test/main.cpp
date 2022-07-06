@@ -26,11 +26,9 @@ void comment_got(Comment* comment, void* ptr, int is_title){
 
 void post_got(Post* post, void* ptr) {
     printf("Post '%s' by '%s' in 'r/%s'", post->title.c_str(), post->author.c_str(), post->subreddit->name.c_str());
-    if(post->is_img()) {
-        std::string path = post->get_image_path();
+    std::string path = post->get_thumb_path();
 
-        printf("\tImage: %s\n", path.c_str());
-    }
+    printf("\tThumbnail: %s\n", path.c_str());
     printf("\n\n");
 }
 

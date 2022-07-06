@@ -38,6 +38,8 @@ public:
     std::string get_cache_path();
     std::string get_image_path();
 
+    std::string get_thumb_path();
+
     bool is_img();
 };
 

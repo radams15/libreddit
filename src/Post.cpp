@@ -170,6 +170,30 @@ std::string Post::get_image_path() {
     return save_path;
 }
 
+std::string Post::get_thumb_path() {
+    if(thumbnail.empty()){
+        return "";
+    }
+
+    if(thumbnail == "nsfw" || thumbnail == "spoiler"){
+        return get_cache_path() + "/" + thumbnail + ".png";
+    }
+
+    std::string uid = id + "_thumb." + FileUtils::get_extension(thumbnail);
+
+    std::string save_path = get_cache_path() + "/" + uid;
+
+    if(!FileUtils::exists(save_path)){
+        int fail = req_get_dl(thumbnail.c_str(), save_path.c_str(), 0, "", subreddit->reddit->get_headers());
+        if(fail){
+            std::cerr << "Failed to download: " << save_path << std::endl;
+            return "";
+        }
+    }
+
+    return save_path;
+}
+
 
 std::string Post::get_save_path() {
 #if defined(__APPLE__)
