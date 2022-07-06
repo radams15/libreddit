@@ -5,6 +5,7 @@
 #include <Post.h>
 
 #include "Reddit.h"
+#include "Comment.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +14,10 @@
 #include <pthread.h>
 #include "cJSON.h"
 #include "request.h"
+
+#include <iostream>
+
+#include "FileUtils.h"
 
 typedef void*(*pthread_cb)(void*);
 
@@ -60,12 +65,15 @@ void process_comment_listing(cJSON* listing, comment_cb callback, void* ptr, Com
             out->no_children = 0;
             out->children = (void**) malloc(0);
 
-            out->title = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "title"));
-            out->url = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "url"));
-            out->author = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "author_fullname"));
-            out->body = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "body"));
-            out->id = cJSON_GetStringValue(cJSON_GetObjectItem(child_data, "id"));
-            out->score = (unsigned long) cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, "score"));
+#define GET_STR(json, key) cJSON_GetObjectItem(child_data, key) != NULL? cJSON_GetStringValue(cJSON_GetObjectItem(child_data, key)) : "ERROR"
+#define GET_NUM(json, key) cJSON_GetObjectItem(child_data, key) != NULL? cJSON_GetNumberValue(cJSON_GetObjectItem(child_data, key)) : 0
+
+            out->title = GET_STR(child_data, "title");
+            out->url = GET_STR(child_data, "url");
+            out->author = GET_STR(child_data, "author_fullname");
+            out->body = GET_STR(child_data, "body");
+            out->id = GET_STR(child_data, "id");
+            out->score = (unsigned long) GET_NUM(child_data, "score");
 
             cJSON* replies = cJSON_GetObjectItem(child_data, "replies");
 
@@ -145,4 +153,61 @@ int Post::get_comments_t(unsigned long limit, std::string after, comment_cb call
     int res = pthread_create(&thread, NULL, (pthread_cb) &post_get_comments_helper, args);
 
     return res;
+}
+
+std::string Post::get_image_path() {
+    if(!is_img()){
+        return "";
+    }
+
+    std::string uid = id + "." + FileUtils::get_extension(url);
+
+    std::string save_path = get_cache_path() + "/" + uid;
+
+    if(!FileUtils::exists(save_path)){
+        int fail = req_get_dl(url.c_str(), save_path.c_str(), 0, "", subreddit->reddit->get_headers());
+        if(fail){
+            std::cerr << "Failed to download: " << save_path << std::endl;
+            return "";
+        }
+    }
+
+    return save_path;
+}
+
+
+std::string Post::get_save_path() {
+#if defined(__APPLE__)
+    return "/Users/"+FileUtils::get_username() + "/Library/JReddit/";
+#elif defined(__UNIX__)
+    return "/home/"+FileUtils::get_username() + "/.config/JReddit/";
+#elif defined(WIN32)
+    return "/JReddit/";
+#else
+    #error Cannot determine OS (get_save_path)!
+#endif
+}
+
+std::string Post::get_cache_path() {
+#if defined(__APPLE__)
+    return "/Users/"+FileUtils::get_username() + "/Library/JReddit/cache/";
+#elif defined(__UNIX__)
+    return "/home/"+FileUtils::get_username() + "/.cache/JReddit/";
+#elif defined(WIN32)
+    return "/JReddit/cache/";
+#else
+    #error Cannot determine OS (get_save_path)!
+#endif
+}
+
+void comments_list_adder(Comment* item, void* ptr, int is_title){
+    ((std::vector<Comment*>*)ptr)->push_back(item);
+}
+
+std::vector<Comment *> Post::get_comments_list(unsigned long limit, std::string after) {
+    std::vector<Comment *> out;
+
+    get_comments(limit, after, comments_list_adder, (void*) &out);
+
+    return out;
 }

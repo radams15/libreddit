@@ -29,6 +29,12 @@ void post_got(Post* post, void* ptr) {
     if (post->is_img()) {
         printf("\tImage: %s\n", post->url.c_str());
     }
+
+    auto comments = post->get_comments_list(10, "");
+
+    for(Comment * c : comments){
+        printf("\t%s\n", c->body.c_str());
+    }
 }
 
 int main() {

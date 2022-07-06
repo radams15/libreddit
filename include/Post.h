@@ -6,6 +6,7 @@
 #define LIBREDDIT_POST_H
 
 #include <string>
+#include <vector>
 
 #include "Comment.h"
 
@@ -28,9 +29,14 @@ public:
     int get_comments(unsigned long limit, std::string after, comment_cb callback, void* ptr);
 
     int get_comments_t(unsigned long limit, std::string after, comment_cb callback, void *ptr);
+    std::vector<Comment*> get_comments_list(unsigned long limit, std::string after);
 
     std::string fullname();
     std::string full_url();
+
+    std::string get_save_path();
+    std::string get_cache_path();
+    std::string get_image_path();
 
     bool is_img();
 };
