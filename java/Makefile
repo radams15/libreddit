@@ -3,9 +3,9 @@ CJSON_SRC=../lib/cJSON/cJSON.c ../lib/cJSON/cJSON_Utils.c
 B64_SRC=../lib/librequest/lib/b64.c/buffer.c ../lib/librequest/lib/b64.c/decode.c ../lib/librequest/lib/b64.c/encode.c
 
 REQ_SRC=../lib/librequest/src/main/res.c ../lib/librequest/src/main/header.c ../lib/librequest/src/main/request_generic.c
-REDDIT_SRC=../src/Reddit.cpp ../src/Post.cpp ../src/Subreddit.cpp ../src/Comment.cpp
+REDDIT_SRC=../src/Reddit.cpp ../src/Post.cpp ../src/Subreddit.cpp ../src/Comment.cpp ../src/FileUtils.cpp
 
-INCLUDES=-I../lib/librequest/include -I../include -I../lib/cJSON -I../lib/librequest/lib/b64.c/
+INCLUDES=-I../lib/librequest/include -I../include -I../lib/cJSON -I../lib/librequest/lib/b64.c/ -I../src
 
 JAVA_HOME ?= /Users/rhys/Library/Java/JavaVirtualMachines/openjdk-17.0.2/Contents/Home
 OS ?= darwin
