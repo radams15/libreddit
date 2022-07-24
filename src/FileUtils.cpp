@@ -92,7 +92,7 @@ std::string FileUtils::get_cache_path() {
 }
 
 std::string FileUtils::read(std::string path) {
-    std::ifstream in(path, 'r');
+    std::ifstream in(path.c_str());
 
     std::stringstream out;
 
