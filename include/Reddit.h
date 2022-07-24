@@ -14,6 +14,10 @@
 #include <string>
 #include <cJSON.h>
 
+namespace std{
+    string itos(unsigned long val);
+}
+
 class Reddit {
 public:
     bool authenticated;

@@ -18,6 +18,13 @@ int strlen(std::string str){
     return str.length();
 }
 
+std::string std::itos(unsigned long inp){
+    char buf[128];
+    sprintf(buf, "%lu", inp);
+
+    return std::string(buf);
+}
+
 struct Headers* Reddit::get_headers(){
     Headers_t* out = NULL;
 
@@ -136,14 +143,14 @@ void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
     std::string url ="https://oauth.reddit.com/hot";
 
     if(args->limit != -1){
-        url += "?limit=" + std::to_string(args->limit);
+        url += "?limit=" + std::itos(args->limit);
     }
 
     if(! args->after.empty()) {
         if (args->limit != -1) {
-            url += "&after=" + std::to_string(args->limit);
+            url += "&after=" + std::itos(args->limit);
         } else if (args->limit == -1) {
-            url += "?after=" + std::to_string(args->limit);
+            url += "?after=" + std::itos(args->limit);
         }
 
         url += args->after;

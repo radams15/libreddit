@@ -49,14 +49,14 @@ void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
     std::string url = "https://oauth.reddit.com/r/" + args->subreddit->name + "/" + args->type;
 
     if(args->limit != -1){
-        url += "?limit=" + std::to_string(args->limit);
+        url += "?limit=" + std::itos(args->limit);
     }
 
     if(! args->after.empty()) {
         if (args->limit != -1) {
-            url += "&after=" + std::to_string(args->limit);
+            url += "&after=" + std::itos(args->limit);
         } else if (args->limit == -1) {
-            url += "?after=" + std::to_string(args->limit);
+            url += "?after=" + std::itos(args->limit);
         }
 
         url += args->after;

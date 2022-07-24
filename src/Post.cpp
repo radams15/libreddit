@@ -101,7 +101,7 @@ void* post_get_comments_helper(struct post_get_comments_args* args) {
     std::string url = "https://oauth.reddit.com/comments/" + args->post->id;
 
     if(args->limit != -1){
-        url += "?limit=" + std::to_string(args->limit);
+        url += "?limit=" + std::itos(args->limit);
     }
 
     Res_t* raw = req_get(url.c_str(), 0, NULL, headers);
