@@ -2,8 +2,6 @@
 // Created by Rhys on 14/03/2022.
 //
 
-#define PRIVATE
-
 #include <Subreddit.h>
 
 #include "Reddit.h"
@@ -12,6 +10,8 @@
 #include <vector>
 #include "cJSON.h"
 #include "request.h"
+
+#include <stdlib.h>
 
 typedef void*(*pthread_cb)(void*);
 

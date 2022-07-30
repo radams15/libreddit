@@ -4,7 +4,8 @@
 
 #include "FileUtils.h"
 
-#if defined(__UNIX__) || defined(__APPLE__)
+
+#if defined(__unix__) || defined(__APPLE__)
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/stat.h>
@@ -70,7 +71,7 @@ bool FileUtils::exists(std::string path) {
 std::string FileUtils::get_save_path() {
 #if defined(__APPLE__)
     return "/Users/"+get_username() + "/Library/JReddit/";
-#elif defined(__UNIX__)
+#elif defined(__unix__)
     return "/home/"+get_username() + "/.config/JReddit/";
 #elif defined(WIN32)
     return "/JReddit/";
@@ -82,7 +83,7 @@ std::string FileUtils::get_save_path() {
 std::string FileUtils::get_cache_path() {
 #if defined(__APPLE__)
     return "/Users/"+FileUtils::get_username() + "/Library/JReddit/cache/";
-#elif defined(__UNIX__)
+#elif defined(__unix__)
     return "/home/"+FileUtils::get_username() + "/.cache/JReddit/";
 #elif defined(WIN32)
     return "/JReddit/cache/";
