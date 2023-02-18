@@ -43,7 +43,7 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
 
     Headers_t* headers = get_headers(reddit);
 
-    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", reddit->use_proxy, reddit->proxy, data, headers, client_id, secret);
+    Res_t* raw = req_post_auth("https://www.reddit.com/api/v1/access_token", data, headers, client_id, secret);
 
     headers_free(headers);
     free(data);
@@ -64,8 +64,6 @@ int login(Reddit_t* reddit, const char *username, const char *password, const ch
 Reddit_t* reddit_new(const char* username, const char *password, const char *client_id, const char *secret) {
     Reddit_t* out = malloc(sizeof(Reddit_t));
 
-    out->use_proxy = 0;
-    out->proxy = strdup("http://http.therhys.co.uk/yt/proxy.php?url=");
     out->authenticated = 0;
 
     if(login(out, username, password, client_id, secret) == EXIT_SUCCESS){
@@ -87,7 +85,7 @@ int reddit_get_login_status(Reddit_t* reddit){
 
     strcpy(url, "https://oauth.reddit.com/api/v1/scopes");
 
-    Res_t* raw = req_get(url, reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get(url, headers);
 
     headers_free(headers);
 
@@ -109,12 +107,9 @@ int reddit_get_login_status(Reddit_t* reddit){
 Reddit_t* reddit_new_with_token(const char *username, const char* token) {
     Reddit_t* out = malloc(sizeof(Reddit_t));
 
-    out->use_proxy = 0;
     out->authenticated = 1; // Just so that get_headers uses the token anyway.
 
     out->token = strdup(token);
-
-    out->proxy = strdup("http://http.therhys.co.uk/yt/proxy.php?url=");
 
     out->authenticated = reddit_get_login_status(out);
 
@@ -181,7 +176,7 @@ void* reddit_get_posts_hot_helper(struct get_post_hot_args* args) {
         strcat(url, args->before);
     }
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, headers);
 
     headers_free(headers);
 
@@ -257,7 +252,7 @@ void* subreddit_get_posts_helper(struct subreddit_get_posts_args* args) {
         strcat(url, args->before);
     }
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, headers);
 
     headers_free(headers);
 
@@ -304,7 +299,7 @@ List_t* reddit_get_subbed_list(Reddit_t *reddit) {
 
     Headers_t* headers = get_headers(reddit);
 
-    Res_t* raw = req_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", reddit->use_proxy, reddit->proxy, headers);
+    Res_t* raw = req_get("https://oauth.reddit.com/subreddits/mine/subscriber?limit=500", headers);
 
     headers_free(headers);
 
@@ -414,7 +409,7 @@ void* post_get_comments_helper(struct post_get_comments_args* args) {
     }
 
 
-    Res_t* raw = req_get(url, args->reddit->use_proxy, args->reddit->proxy, headers);
+    Res_t* raw = req_get(url, headers);
 
     headers_free(headers);
 
@@ -521,7 +516,7 @@ Post_t* reddit_get_post_by_id(Reddit_t *reddit, const char *id) {
     char* url = calloc(512+strlen(id), sizeof(char));
     sprintf(url, "https://reddit.com/comments/%s/.json", id);
 
-    Res_t* raw = req_get(url, 0, NULL, headers);
+    Res_t* raw = req_get(url, headers);
 
     free(url);
     headers_free(headers);

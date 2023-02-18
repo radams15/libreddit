@@ -25,8 +25,6 @@ typedef struct Reddit{
     const char* username;
     int authenticated;
 #ifdef PRIVATE
-    int use_proxy;
-    const char* proxy;
     const char* client_id;
     const char* client_secret;
     const char* password;
