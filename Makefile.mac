@@ -1,13 +1,13 @@
 ARCH ?= -arch ppc
 TARGET ?= -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk
-CC=gcc
+CC=g++
 
 CJSON_SRC=lib/cJSON/cJSON.c lib/cJSON/cJSON_Utils.c
 
 B64_SRC=lib/librequest/lib/b64.c/buffer.c lib/librequest/lib/b64.c/decode.c lib/librequest/lib/b64.c/encode.c
 
 REQ_SRC=lib/librequest/src/main/res.c lib/librequest/src/main/header.c lib/librequest/src/main/request_generic.c
-REDDIT_SRC=src/Reddit.c src/Post.c src/List.c src/Subreddit.c src/Comment.c lib/librequest/src/main/backends/darwin/request.m 
+REDDIT_SRC=src/Reddit.cpp src/Post.cpp src/Subreddit.cpp src/Comment.cpp lib/librequest/src/main/backends/darwin/request.m 
 
 INCLUDES=-Ilib/librequest/include -Iinclude -Ilib/cJSON -Ilib/librequest/lib/b64.c/
 
