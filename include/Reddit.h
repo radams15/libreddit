@@ -40,6 +40,7 @@ LIBRARY_API Reddit_t* reddit_new_with_token(const char *username, const char* to
 LIBRARY_API int reddit_get_posts_hot(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
 LIBRARY_API int reddit_get_posts_hot_t(Reddit_t* reddit, unsigned long limit, const char* after, post_cb callback, void* ptr);
 LIBRARY_API List_t* reddit_get_posts_hot_list(Reddit_t* reddit, unsigned long limit, const char* after);
+LIBRARY_API Post_t*  reddit_get_post_by_id(Reddit_t* reddit, const char* id);
 
 LIBRARY_API List_t* reddit_get_subbed_list(Reddit_t* reddit);
 

@@ -42,9 +42,11 @@ int main() {
         fprintf(stderr, "Failed to login!\n");
     }
 
-	printf("Tok: %s\n", reddit->token);
+	//printf("Tok: %s\n", reddit->token);
 
-    reddit_get_posts_hot(reddit, 100, "", post_got, NULL);
+    //reddit_get_posts_hot(reddit, 100, "", post_got, NULL);
+
+    post_got(reddit_get_post_by_id(reddit, "1145zh7"), NULL);
 
     /*Post_t post;
     post.id = strdup("t8o6cr");

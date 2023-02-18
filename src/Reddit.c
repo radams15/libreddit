@@ -514,4 +514,35 @@ int post_get_comments_t(Reddit_t *reddit, Post_t *post, unsigned long limit, con
 
     return res;
 }
+
+Post_t* reddit_get_post_by_id(Reddit_t *reddit, const char *id) {
+    Headers_t* headers = get_headers(reddit);
+
+    char* url = calloc(512+strlen(id), sizeof(char));
+    sprintf(url, "https://reddit.com/comments/%s/.json", id);
+
+    Res_t* raw = req_get(url, 0, NULL, headers);
+
+    free(url);
+    headers_free(headers);
+
+    cJSON* json = cJSON_Parse(raw->data);
+
+    if(cJSON_GetArraySize(json) == 0){
+        cJSON_free(json);
+
+        return NULL;
+    }
+
+    cJSON* itmZero = cJSON_GetArrayItem(json,  0);
+    cJSON* data = cJSON_GetObjectItem(itmZero, "data");
+    cJSON* children = cJSON_GetObjectItem(data, "children");
+
+    cJSON* child = cJSON_GetArrayItem(children, 0);
+    Post_t* post = process_post(child);
+    res_free(raw);
+
+    return post;
+}
+
 #endif
